@@ -3,17 +3,29 @@
 ## What is in the code
 
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096   438 May 31 14:54 00_config.auto.tfvars
+
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096   327 May 31 12:39 00_provider.tf
+
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096   900 Jun  5 06:52 01_variables.tf
+
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096   937 Jun  5 06:51 10_sg_for_kafka_cluster.tf
+
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096  1252 Jun  5 10:17 11_iam_policy_for_kafka.tf
+
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096  2495 Jun  5 11:07 12_iam_server_role_with_kafka_policy.tf
+
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096   866 Jun  5 11:18 13_MSK_auto_scale_storage.tf
+
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096   145 Jun  5 05:59 14_MSK_log_group.tf
+
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096   522 Jun  5 06:33 15_msk_configuration.tf
+
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096  1513 Jun  5 11:18 30_MSK_Provisioned.tf
+
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096   435 Jun  5 08:29 40_MSK_Serverless.tfx
+
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096 24466 Jun  5 11:52 terraform.tfstate
+
 -rw-r--r-- 1 RLDATIX+Ilija.Dimitrov 4096 10118 Jun  5 11:18 terraform.tfstate.backup
 
 
