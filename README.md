@@ -175,6 +175,7 @@ aws_security_group.kafka
 RLDATIX+Ilija.Dimitrov@SKP-L3617 MINGW64 ~
 ```
 
+When destroying the Provisioned Cluster you mast destroy also 13_MSK_auto_scale_storage.tf.
 
 Created by:
 Iko
