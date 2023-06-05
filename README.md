@@ -149,6 +149,32 @@ Command for the Consumer:
 
 And it works. :)
 
+This is being saved in Terraform State:
+```
+$ terraform.exe state list
+aws_appautoscaling_policy.kafka_broker_scaling_policy
+aws_appautoscaling_target.kafka_storage
+aws_cloudwatch_log_group.MSKLogs
+aws_iam_instance_profile.EC2_Default_IAM_Role1
+aws_iam_policy.IAMSysOpsMSKPolicy
+aws_iam_role.EC2_Default_IAM_Role1
+aws_iam_role_policy_attachment.AWSBackupFullAccess_attachment
+aws_iam_role_policy_attachment.AWSBackupServiceRolePolicyForBackup_attachment
+aws_iam_role_policy_attachment.AWSBackupServiceRolePolicyForRestores_attachment
+aws_iam_role_policy_attachment.AmazonEC2RoleforSSM_attachment
+aws_iam_role_policy_attachment.AmazonS3FullAccess_attachment
+aws_iam_role_policy_attachment.AmazonSSMMaintenanceWindowRole_attachment
+aws_iam_role_policy_attachment.CloudWatchAgentAdminPolicy_attachment
+aws_iam_role_policy_attachment.CloudWatchAgentServerPolicy_attachment
+aws_iam_role_policy_attachment.IAMSysOpsMSKPolicy_attachment
+aws_msk_cluster.Time247MSK
+aws_msk_configuration.MSKConfig
+aws_msk_serverless_cluster.MSK247Serverless
+aws_security_group.kafka
+
+RLDATIX+Ilija.Dimitrov@SKP-L3617 MINGW64 ~
+```
+
 
 Created by:
 Iko
