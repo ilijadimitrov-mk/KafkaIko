@@ -111,11 +111,12 @@ MSK Serverless Cluster Configuration.
 
 ## Installing Server to test
 
-Creation od EC2 instance to manage the cluster is not done by Terrform. If needed can be created and installed so we can create the Topics but we expect that this will be handeld by the APP.
+Creation of EC2 instance to manage the cluster is not done by Terraform. If needed can be created and installed so we can create the Topics, but we expect that this will be handled by the APP.
 
-For test purposes Linux 2 EC2 instace was created.
+For test purposes Linux 2 EC2 instance was created.
 
-Instalation steps:
+Installation steps:
+
 
 ```
 sudo yum -y install java-11
@@ -130,17 +131,17 @@ vim client.properties
     asl.jaas.config=software.amazon.msk.auth.iam.IAMLoginModule required;
     asl.client.callback.handler.class=software.amazon.msk.auth.iam.IAMClientCallbackHandler
 
-From the MSK get the broker endpoint. One i enough.
+From the MSK get the broker endpoint. One is enough.
 
 Command to create Topic:
 
  ./kafka-topics.sh --create --bootstrap-server b-2.sysopsmsktest.a2w4xb.c4.kafka.us-east-2.amazonaws.com:9098 --replication-factor 3 --partitions 1 --topic MSKTutorialTopic --command-config client.properties
 
-Command for the Producer
+Command for the Producer:
 
   ./kafka-console-producer.sh --broker-list b-2.sysopsmsktest.a2w4xb.c4.kafka.us-east-2.amazonaws.com:9098 --producer.config client.properties --topic MSKTutorialTopic
 
-Command for the Consumer
+Command for the Consumer:
 
 /kafka-console-consumer.sh --bootstrap-server b-2.sysopsmsktest.a2w4xb.c4.kafka.us-east-2.amazonaws.com:9098 --consumer.config client.properties --topic MSKTutorialTopic --from-beginning
 
