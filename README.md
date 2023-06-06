@@ -183,11 +183,10 @@ Code is in GIT and GIT Actions were implemented.
 
 ![alt text](IMG3.png "Git Action Report")
 
-At start Git Action reported few best practise improvements:
+At start Git Action reported few best practices improvements:
 - retention of logs to be gt 1 year (set to 400 days)
-- KMS encription for logs (creating KMS Key)
-- KMS encription for Kafka (creating KMS key)
-
+- KMS encryption for logs (creating KMS Key)
+- KMS encryption for Kafka (creating KMS key)
 
 Created by:
 Iko
