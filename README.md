@@ -177,5 +177,17 @@ RLDATIX+Ilija.Dimitrov@SKP-L3617 MINGW64 ~
 
 When destroying the Provisioned Cluster you mast destroy also 13_MSK_auto_scale_storage.tf.
 
+## GIT Action
+
+Code is in GIT and GIT Actions were implemented.
+
+![alt text](IMG3.png "Git Action Report")
+
+At start Git Action reported few best practise improvements:
+- retention of logs to be gt 1 year (set to 400 days)
+- KMS encription for logs (creating KMS Key)
+- KMS encription for Kafka (creating KMS key)
+
+
 Created by:
 Iko

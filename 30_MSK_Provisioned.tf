@@ -4,7 +4,7 @@ resource "aws_msk_cluster" "Time247MSK" {
   number_of_broker_nodes = 3
   broker_node_group_info {
     instance_type = "kafka.t3.small" ##kafka.m5.4xlarge
-#    instance_type = "kafka.m5.xlarge" ##kafka.m5.4xlarge
+    #    instance_type = "kafka.m5.xlarge" ##kafka.m5.4xlarge
     client_subnets = [
       var.subnet1_id,
       var.subnet2_id,
@@ -13,14 +13,14 @@ resource "aws_msk_cluster" "Time247MSK" {
     storage_info {
       ebs_storage_info {
         provisioned_throughput {
-          enabled           = false #true # sto znaci ova
-#          volume_throughput = "250"
+          enabled = false #true # sto znaci ova
+          #          volume_throughput = "250"
         }
         volume_size = 10
       }
     }
 
-    security_groups = [aws_security_group.kafka.id] 
+    security_groups = [aws_security_group.kafka.id]
   }
 
   client_authentication {
@@ -35,7 +35,7 @@ resource "aws_msk_cluster" "Time247MSK" {
   }
 
   configuration_info {
-    arn      = aws_msk_configuration.MSKConfig.arn 
+    arn      = aws_msk_configuration.MSKConfig.arn
     revision = "1"
   }
 
@@ -56,14 +56,22 @@ resource "aws_msk_cluster" "Time247MSK" {
     }
   }
 
-# encryption_info {
-#   encryption_at_rest_kms_key_arn = data.aws_kms_key.kafka.arn
-#    encryption_at_rest_kms_key_arn = aws_kms_key.key.arn
-# }
+  # encryption_info {
+  #   encryption_at_rest_kms_key_arn = data.aws_kms_key.kafka.arn
+  #    encryption_at_rest_kms_key_arn = aws_kms_key.key.arn
+  # }
+  encryption_info {
+    encryption_at_rest_kms_key_arn = aws_kms_key.kafka.arn
+
+    encryption_in_transit {
+      client_broker = "TLS"
+      in_cluster    = true
+    }
+  }
 
   tags = {
     Environment = var.Environment
-    Product      = var.Product
+    Product     = var.Product
   }
 
   lifecycle {

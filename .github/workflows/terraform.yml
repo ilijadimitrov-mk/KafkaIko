@@ -1,0 +1,57 @@
+---
+name: "Validate Terraform files"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.2.8
+
+# Run a terraform fmt for push and PR on non-main branch
+      - name: Terraform Format
+        id: fmt
+        if: github.ref != 'refs/heads/main'
+        run: terraform fmt -diff -check -no-color -recursive
+
+      - name: Run `terraform init`
+        id: init
+        run: terraform init
+
+      - name: Run `terraform validate`
+        id: validate
+        if: github.ref != 'refs/heads/main' && (success() || failure())
+        run: terraform validate -no-color
+      
+      - name: Checkov
+        if: github.event_name == 'pull_request'
+        id: checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          quiet: true
+          framework: terraform
+          output_format: github_failed_only
+          soft_fail: false
+          directory: /
+          download_external_modules: true
+          
+
