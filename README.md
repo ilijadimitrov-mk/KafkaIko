@@ -188,5 +188,224 @@ At start Git Action reported few best practices improvements:
 - KMS encryption for logs (creating KMS Key)
 - KMS encryption for Kafka (creating KMS key)
 
-Created by:
+
+## Test Deployment
+
+On the meeting was agreed to continue with Serverless Kafka. The code is used - 247Time. A new branch was created and in terraform product for Test 247 Time was set to point to the new Branch.
+Branch Name: main_testing (not to be merged).
+Git Repo: url = https://github.com/rld-techops/tf-247.git  -  use for test branch  -  "main_testing"
+Terraform Repo: https://app.terraform.io/app/allocatesoftware/workspaces/techops-247-testing
+What has been added:
+in TF/  --- kafka_247time.tf (SG and Serverless Kafka is set).
+```
+resource "aws_msk_serverless_cluster" "kafka247timetesting" {    #kafka247timetesting need changing
+  cluster_name = "EW1T24TIMEK01"    #EW1T24TIMEK01 needs changing
+
+  vpc_config {
+    subnet_ids         = ["subnet-0dc2574e3bfeb9fbe", "subnet-09ed5137b5f2cf38d"]    #   if needed change the subnets
+    security_group_ids = [aws_security_group.kafka.id]
+  }
+
+  client_authentication {
+    sasl {
+      iam {
+        enabled = true
+      }
+    }
+  }
+  tags = {
+    Name          = "EW1T24TIMEK01-Kafka"     # need changing
+    TeamEmail     = "TechOps@allocatesoftware.com"
+    TerraformRepo = "https://github.com/asw-techops/tf-247time"
+    ManagedBy     = "Terraform"
+    Description   = "Managed Kafka"
+    Environment   = "Test"
+    CostCentre    = "247time"
+    Product       = "247time"
+  }
+
+}
+
+
+
+resource "aws_security_group" "kafka" {      # need changing
+  description = "Access to managed Kafka"
+  vpc_id      = var.vpc_id
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    description = "Access From itself"
+    self        = true
+  }
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = ["${module.ec2_247time.ec2_sg_id}"]     # need changing
+    description     = "Allow from serevr1"
+  }
+
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow outbound"
+  }
+
+  tags = {
+    Name          = "EW1T24TIMEK01-Kafka-SG"      #  need changing
+    TeamEmail     = "TechOps@allocatesoftware.com"
+    TerraformRepo = "https://github.com/asw-techops/tf-247time"
+    ManagedBy     = "Terraform"
+    Description   = "Security group for EW1T24TIMEK01"   # need changing
+    Environment   = "Test"
+    CostCentre    = "247time"
+    Product       = "247time"
+  }
+
+}
+
+```
+in TF/modules/ec2-webserver: kafkapolicy.json and iam.tf
+```
+
+$ cat iam.tf
+/*
+
+  SSM IAM Role Creation
+
+  Resources:
+  aws_iam_role.ssm -> Creation of IAM Role
+  aws_iam_role_policy_attachment.attachssm -> Attach SSM Managed Instance Role
+  aws_iam_role_policy_attachment.attachssmec -> Attach SSM Managed Instance Role
+  aws_iam_instance_profile.ec2 -> Attach IAM role to aws_instance.web
+
+*/
+
+resource "aws_iam_policy" "kafka" {
+  name        = "kafka"
+  path        = "/"
+  description = ""
+
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "kafka-cluster:Connect",
+          "kafka-cluster:AlterCluster",
+          "kafka-cluster:DescribeCluster"
+        ],
+        "Resource" : [
+          "arn:aws:kafka:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:cluster/*/*"
+        ]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "kafka-cluster:*Topic*",
+          "kafka-cluster:WriteData",
+          "kafka-cluster:ReadData"
+        ],
+        "Resource" : [
+          "arn:aws:kafka:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:topic/*/*"
+        ]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "kafka-cluster:AlterGroup",
+          "kafka-cluster:DescribeGroup"
+        ],
+        "Resource" : [
+          "arn:aws:kafka:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:group/*/*"
+        ]
+      }
+    ]
+  })
+}
+
+
+
+
+
+resource "aws_iam_role" "ssm" {
+  name = "${var.name}-SSM-ASSOCIATION"
+
+  assume_role_policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": {
+      "Effect": "Allow",
+      "Principal": {"Service": ["ec2.amazonaws.com", "ssm.amazonaws.com", "s3.amazonaws.com"]},
+      "Action": "sts:AssumeRole"
+    }
+  }
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "attachssm" {
+  role       = aws_iam_role.ssm.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "attachssmec" {
+  role       = aws_iam_role.ssm.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+}
+
+resource "aws_iam_policy" "asset" {
+    name = "${var.name}-S3-ACCESS"
+    description = "Allows access to the S3 for grabbing assets during initial setup."
+    policy = templatefile(".//modules/ec2-webserver/s3policy.json", local.vars)
+}
+
+resource "aws_iam_policy_attachment" "attach" {
+  name       = "${var.name}-ASSET-ATTACHMENT"
+  roles      = [aws_iam_role.ssm.name]
+  policy_arn = aws_iam_policy.asset.arn
+}
+
+resource "aws_iam_instance_profile" "ec2" {
+    name = "${var.name}-ec2"
+    role = aws_iam_role.ssm.id
+}
+
+resource "aws_iam_role_policy_attachment" "attachkafka" {
+  policy_arn = aws_iam_policy.kafka.arn
+  role       = aws_iam_role.ssm.name
+}
+
+
+```
+We had to upgrade the TF to a higher version so the code can be executed. The working version was not supporting MSK.
+
+Deployment went well with no bigger problems.
+
+### Important to know
+Once the deployment was done and because the DNS resolver and the MSK are in different VPC the endpoint was not advertised to our DNS so it couldn’t be reached. Ticket was opened to AWS.
+What we found out is that by default this is advertised in the local VPC and that is why we went and used the created endpoint DNS names.
+```
+PS C:\Users\ilija.dimitrov> Test-NetConnection  vpce-07c85d5f7de10fd2d-seuepn1b.vpce-svc-05e112cde0619d01d.eu-west-1.vpce.amazonaws.com -Port 9098
+
+
+ComputerName     : vpce-07c85d5f7de10fd2d-seuepn1b.vpce-svc-05e112cde0619d01d.eu-west-1.vpce.amazonaws.com
+RemoteAddress    : 172.17.34.221
+RemotePort       : 9098
+InterfaceAlias   : Ethernet 2
+SourceAddress    : 172.17.34.63
+TcpTestSucceeded : True
+
+
+
+PS C:\Users\ilija.dimitrov>
+```
+
+Createdd by:
 Iko
