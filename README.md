@@ -407,5 +407,141 @@ TcpTestSucceeded : True
 PS C:\Users\ilija.dimitrov>
 ```
 
+Set client for Provisioned Kafka:
+
+https://catalog.workshops.aws/msk-labs/en-US/securityencryption/saslscram/authorization
+echo -n "security.protocol=SASL_SSL
+sasl.mechanism=SCRAM-SHA-512
+sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required \\
+  username="247testenv" \\
+  password="tesT247!envPass";
+" > /tmp/client.properties_247testenv
+
+
+
+
+cd /home/ec2-user/kafka_2.13-2.8.1/
+cn=247testenv
+export dn="User:${cn}"
+bin/kafka-acls.sh --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --add --allow-principal $dn --operation Create --operation Alter --cluster --command-config /tmp/client.properties_247testenv
+bin/kafka-acls.sh --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --add --allow-principal $dn --operation Create --operation Delete --topic=* --command-config /tmp/client.properties_247testenv
+
+
+bin/kafka-acls.sh --bootstrap-server $brokerssasl --add --allow-principal $dn --operation Read --topic testaclfail group=* --command-config /tmp/client.properties_alice
+bin/kafka-acls.sh --bootstrap-server $brokerssasl --add --allow-principal $dn --operation Read --operation Write --topic test group=* --command-config /tmp/client.properties_alice
+
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$ cn=247testenv
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$ export dn="User:${cn}"
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$ bin/kafka-acls.sh --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --add --allow-principal $dn --operation Create --operation Alter --cluster --command-config /tmp/client.properties_247testenv
+rver b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --add --allow-principal $dn --operation Create --operation Delete --topic=* --command-config /tmp/client.properties_247testenv
+Adding ACLs for resource `ResourcePattern(resourceType=CLUSTER, name=kafka-cluster, patternType=LITERAL)`:
+        (principal=User:247testenv, host=*, operation=CREATE, permissionType=ALLOW)
+        (principal=User:247testenv, host=*, operation=ALTER, permissionType=ALLOW)
+
+Current ACLs for resource `ResourcePattern(resourceType=CLUSTER, name=kafka-cluster, patternType=LITERAL)`:
+        (principal=User:247testenv, host=*, operation=CREATE, permissionType=ALLOW)
+        (principal=User:247testenv, host=*, operation=ALTER, permissionType=ALLOW)
+
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$ bin/kafka-acls.sh --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --add --allow-principal $dn --operation Create --operation Delete --topic=* --command-config /tmp/client.properties_247testenv
+Adding ACLs for resource `ResourcePattern(resourceType=TOPIC, name=*, patternType=LITERAL)`:
+        (principal=User:247testenv, host=*, operation=DELETE, permissionType=ALLOW)
+        (principal=User:247testenv, host=*, operation=CREATE, permissionType=ALLOW)
+
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=*, patternType=LITERAL)`:
+        (principal=User:247testenv, host=*, operation=DELETE, permissionType=ALLOW)
+        (principal=User:247testenv, host=*, operation=CREATE, permissionType=ALLOW)
+
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$
+
+
+lets create topics
+
+cd /home/ec2-user/kafka
+bin/kafka-topics.sh --create --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --replication-factor 3 --partitions 1 --topic test --command-config /tmp/client.properties_247testenv
+bin/kafka-topics.sh --create --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --replication-factor 3 --partitions 1 --topic testaclfail --command-config /tmp/client.properties_247testenv
+
+
+
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$ bin/kafka-topics.sh --create --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --replication-factor 3 --partitions 1 --topic test --command-config /tmp/client.properties_247testenv
+i9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --replication-factor 3 --partitions 1 --topic testaclfail --command-config /tmp/client.properties_247testenv
+Created topic test.
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$ bin/kafka-topics.sh --create --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --replication-factor 3 --partitions 1 --topic testaclfail --command-config /tmp/client.properties_247testenv
+Created topic testaclfail.
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$
+
+
+
+lets produce
+
+
+bin/kafka-console-producer.sh --broker-list b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --topic test --producer.config /tmp/client.properties_247testenv
+
+
+consumer
+
+bin/kafka-console-consumer.sh --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --topic test --consumer.config /tmp/client.properties_247testenv --from-beginning
+
+at this point no read or write
+>iko [2023-07-14 13:48:08,568] ERROR Error when sending message to topic test with key: null, value: 0 bytes with error: (org.apache.kafka.clients.producer.internals.ErrorLoggingCallback)
+org.apache.kafka.common.errors.TopicAuthorizationException: Not authorized to access topics: [test]
+
+
+to do that
+cn=247testenv
+export dn="User:${cn}"
+bin/kafka-acls.sh --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --add --allow-principal $dn --operation Read --topic testaclfail group=* --command-config /tmp/client.properties_247testenv
+bin/kafka-acls.sh --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --add --allow-principal $dn --operation Read --operation Write --topic test group=* --command-config /tmp/client.properties_247testenv
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$ cn=247testenv
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$ export dn="User:${cn}"
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$ bin/kafka-acls.sh --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --add --allow-principal $dn --operation Read --topic testaclfail group=* --command-config /tmp/client.properties_247testenv
+,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --add --allow-principal $dn --operation Read --operation Write --topic test group=* --command-config /tmp/client.properties_247testenv
+
+Adding ACLs for resource `ResourcePattern(resourceType=TOPIC, name=testaclfail, patternType=LITERAL)`:
+        (principal=User:247testenv, host=*, operation=READ, permissionType=ALLOW)
+
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=testaclfail, patternType=LITERAL)`:
+        (principal=User:247testenv, host=*, operation=READ, permissionType=ALLOW)
+
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$ bin/kafka-acls.sh --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --add --allow-principal $dn --operation Read --operation Write --topic test group=* --command-config /tmp/client.properties_247testenv
+
+Adding ACLs for resource `ResourcePattern(resourceType=TOPIC, name=test, patternType=LITERAL)`:
+        (principal=User:247testenv, host=*, operation=READ, permissionType=ALLOW)
+        (principal=User:247testenv, host=*, operation=WRITE, permissionType=ALLOW)
+
+Current ACLs for resource `ResourcePattern(resourceType=TOPIC, name=test, patternType=LITERAL)`:
+        (principal=User:247testenv, host=*, operation=READ, permissionType=ALLOW)
+        (principal=User:247testenv, host=*, operation=WRITE, permissionType=ALLOW)
+
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$
+
+
+  it works
+
+  [ec2-user@ip-172-31-36-251 bin]$ ./kafka-console-producer.sh --broker-list b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --topic test --producer.config /tmp/client.properties_247testenv
+>Iko
+>Andrej
+>toa ceco
+>leale
+>mane
+>ajde
+>odime
+>manemoj
+>
+
+
+
+[ec2-user@ip-172-31-36-251 kafka_2.13-2.8.1]$ bin/kafka-console-consumer.sh --bootstrap-server b-1.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-2.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096,b-3.time247msk.zi9vxq.c4.kafka.us-east-2.amazonaws.com:9096 --topic test --consumer.config /tmp/client.properties_247testenv --from-beginning
+
+Iko
+Andrej
+toa ceco
+leale
+mane
+ajde
+odime
+manemoj
+
+
+
 Createdd by:
 Iko
