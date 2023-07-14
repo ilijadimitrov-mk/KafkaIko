@@ -8,10 +8,6 @@ resource "aws_kms_key" "cloudwatch" {
   description         = "KMS key cloudwatch"
 }
 
-resource "aws_kms_key" "Kafka247" {
-  description = "Kagka for 247 project for user encription"
-}
-
 
 resource "aws_kms_key_policy" "cloudwatch" {
   key_id = aws_kms_key.cloudwatch.id

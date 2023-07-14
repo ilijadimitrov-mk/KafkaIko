@@ -4,8 +4,7 @@ resource "aws_msk_configuration" "MSKConfig" {
   name           = "MSKConfig"
 
   server_properties = <<PROPERTIES
-auto.create.topics.enable = true
-delete.topic.enable = true
+auto.create.topics.enable=false
 default.replication.factor=3
 min.insync.replicas=2
 num.io.threads=8
@@ -19,9 +18,4 @@ socket.send.buffer.bytes=102400
 unclean.leader.election.enable=true
 zookeeper.session.timeout.ms=18000
 PROPERTIES
-}
-
-output "latest_revision" {
-  value       = one(aws_msk_configuration.MSKConfig[*].latest_revision)
-  description = "Latest revision of the MSK configuration"
 }
